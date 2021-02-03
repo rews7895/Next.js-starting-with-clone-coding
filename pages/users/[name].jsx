@@ -1,25 +1,32 @@
 import fetch from 'isomorphic-unfetch'
+import Profile from '../../components/Profile'
 
-const name = ({user}) => {
-    const username = user && user.name
-    return <div>{username}</div>
-}
-
-// getInitialProps: 서버 사이드 데이터 패치를 위해 사용되던 함수
-name.getInitialProps = async ({query}) => {
-    const {name} = query
-    try {
-        const res = await fetch(`https://api.github.com/users/${name}`)
-        if(res.status == 200) {
-            const user = await res.json()
-            return {props: {user}}
-        }
-        return {props: {user}}
-    } catch(e) {
-        console.log(e)
-        return {}
+const name = ({user, repos}) => {
+    if(!user) {
+        return null;
     }
+    return (
+        <>
+            <Profile user={user}/>
+        </>
+    )
 }
+
+// // getInitialProps: 서버 사이드 데이터 패치를 위해 사용되던 함수
+// name.getInitialProps = async ({query}) => {
+//     const {name} = query
+//     try {
+//         const res = await fetch(`https://api.github.com/users/${name}`)
+//         if(res.status == 200) {
+//             const user = await res.json()
+//             return {props: {user}}
+//         }
+//         return {props: {user}}
+//     } catch(e) {
+//         console.log(e)
+//         return {}
+//     }
+// }
 // // getStaticProps : 빌드 시에 데이터를 불러와 결과를 json으로 저장하여 사용. -> 일관된 데이터를 보여주게 된다.
 // export const getStaticProps = async ({params}) => {
 //     try {
@@ -45,22 +52,26 @@ name.getInitialProps = async ({query}) => {
 //     }
 // }
 // getServerSideProps : 페이지의 데이터를 서버로부터 제공받는 기능을 제공.
-// export const getServerSideProps = async ({query}) => {
-//     const {name} = query
+export const getServerSideProps = async ({query}) => {
+    const {name} = query
+    try {
+        let user
+        let repos
 
-//     try {
-//         const res = await fetch(`https://api.github.com/users/${name}`)
-//         if(res.status === 200) {
-//             const user = await res.json()
-//             // 서버사이드 렌더이기 때문에 콘솔에서만 출력이 된다
-//             console.log(user)
-//             return {props: {user}}
-//         }
-//         return {props: {}}
-//     } catch(e) {
-//         console.log(e)
-//         return {props: {}}
-//     }
-// }
+        const userRes = await fetch(`https://api.github.com/users/${name}`)
+        if(userRes.status === 200) {
+             user = await userRes.json()
+        }
+        const repoRes = await fetch(`https://api.github.com/users/${name}/repos?sort=updated&page=1&per_page=10`)
+        if(repoRes.status === 200) {
+             repos = await repoRes.json()
+        }
+        console.log(user)
+        return {props: {user, repos}}
+    } catch(e) {
+        console.log(e)
+        return {props: {}}
+    }
+}
 
 export default name
