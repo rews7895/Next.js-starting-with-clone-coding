@@ -1,17 +1,47 @@
 import fetch from 'isomorphic-unfetch'
 import Profile from '../../components/Profile'
+import Repositories from '../../components/Repositories'
+import css from 'styled-jsx/css'
 
 const name = ({user, repos}) => {
-    if(!user) {
-        return null;
-    }
     return (
-        <>
+        <div className="user-contents-wrapper">
             <Profile user={user}/>
-        </>
+            <Repositories 
+                repos={repos}
+                user={user}
+            />
+            <style jsx>{style}</style>
+        </div>
     )
 }
 
+// getServerSideProps : 페이지의 데이터를 서버로부터 제공받는 기능을 제공.
+export const getServerSideProps = async ({query}) => {
+    const {name, page} = query
+    try {
+        let user
+        let repos
+
+        const userRes = await fetch(`https://api.github.com/users/${name}`)
+        if(userRes.status === 200) {
+             user = await userRes.json()
+        }
+        const repoRes = await fetch(`https://api.github.com/users/${name}/repos?sort=updated&page=${page}&per_page=10`)
+        if(repoRes.status === 200) {
+             repos = await repoRes.json()
+        }
+        //console.log(repoRes)
+        return {props: {user, repos}}
+    } catch(e) {
+        console.log(e)
+        return {props: {}}
+    }
+}
+
+const style = css`
+    .user-contents-wrapper {display: flex; padding: 20px;}
+`
 // // getInitialProps: 서버 사이드 데이터 패치를 위해 사용되던 함수
 // name.getInitialProps = async ({query}) => {
 //     const {name} = query
@@ -51,27 +81,5 @@ const name = ({user, repos}) => {
 //         fallback: true,
 //     }
 // }
-// getServerSideProps : 페이지의 데이터를 서버로부터 제공받는 기능을 제공.
-export const getServerSideProps = async ({query}) => {
-    const {name} = query
-    try {
-        let user
-        let repos
-
-        const userRes = await fetch(`https://api.github.com/users/${name}`)
-        if(userRes.status === 200) {
-             user = await userRes.json()
-        }
-        const repoRes = await fetch(`https://api.github.com/users/${name}/repos?sort=updated&page=1&per_page=10`)
-        if(repoRes.status === 200) {
-             repos = await repoRes.json()
-        }
-        console.log(user)
-        return {props: {user, repos}}
-    } catch(e) {
-        console.log(e)
-        return {props: {}}
-    }
-}
 
 export default name

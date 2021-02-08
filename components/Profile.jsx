@@ -3,8 +3,6 @@ import {GoMail, GoOrganization, GoLink, GoLocation} from 'react-icons/go'
 
 // styled-jsx : CSS-in-JS 라이브러리로 넥스트에서 기본으로 제공
 const style = css `
-    h2 {margin-left:20px;}
-    .user-bio {margin-top: 12px;font-style: italic;}
     .profile-box {width: 25%; max-width: 272px; margin-right: 26px;}
     .profile-image-wrapper {width: 100%; border: 1px solid #ele4e8;}
     .profile-image-wrapper .profile-image {display: block; width: 100%;}
